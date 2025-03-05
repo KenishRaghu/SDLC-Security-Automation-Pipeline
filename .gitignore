@@ -1,0 +1,13 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.Python
+*.egg-info/
+dist/
+build/
+
+# Scanner outputs (regenerate via CI or local commands in docs/pipeline_usage_guide.md)
+reports/bandit-report.json
+reports/zap-report.json
+reports/unified_findings.json

@@ -1,0 +1,5 @@
+# Web app (DAST target)
+flask>=3.0,<4
+
+# SAST (also used in CI; pin loosely for reproducibility)
+bandit>=1.7.0,<2
