@@ -11,11 +11,11 @@ on:
 
 env:
   PYTHON_VERSION: "3.12"
-  # Flask listens on all interfaces so the ZAP container can reach the host.
+  # Flask listens on all interfaces; health checks use 127.0.0.1 from the runner.
   FLASK_APP: app.vulnerable_app:app
-  # GitHub-hosted runners expose the host to Docker via host.docker.internal (Linux + macOS).
-  # If your runner cannot resolve it, try http://172.17.0.1:5000 instead.
-  DAST_TARGET_URL: http://host.docker.internal:5000
+  # zaproxy/action-baseline runs Docker with --network=host, so the scan shares the runner's
+  # loopback. Use 127.0.0.1 (not host.docker.internal — it is not resolvable in that mode).
+  DAST_TARGET_URL: http://127.0.0.1:5000
 
 jobs:
   security:

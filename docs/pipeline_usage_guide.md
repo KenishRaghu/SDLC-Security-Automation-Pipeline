@@ -9,7 +9,7 @@ Workflow file: `.github/workflows/security-pipeline.yml`
 1. **Install** Python dependencies from `requirements.txt`.
 2. **Start** the sample Flask app on `0.0.0.0:5000` so it is reachable from the ZAP container.
 3. **SAST:** `bandit -r app -f json -o reports/bandit-report.json`
-4. **DAST:** `zaproxy/action-baseline` targets `DAST_TARGET_URL` (default `http://host.docker.internal:5000`) and writes `reports/zap-report.json` (`-J` flag). `-I` avoids failing the ZAP script on WARN-level alerts so the job can still publish artifacts.
+4. **DAST:** `zaproxy/action-baseline` targets `DAST_TARGET_URL` (default **`http://127.0.0.1:5000`** in this repo’s workflow because the action runs ZAP with Docker **`--network=host`**) and writes `reports/zap-report.json` (`-J` flag). `-I` avoids failing the ZAP script on WARN-level alerts so the job can still publish artifacts.
 5. **Normalize:** `python scripts/vuln_parser.py --bandit ... --zap-json ... -o reports/unified_findings.json`
 6. **Track:** `python scripts/vuln_tracker.py --findings ... --baseline known_issues.json -o reports/vuln_report.md`
 7. **Artifacts:** `security-reports` zip on the workflow run contains JSON + Markdown.
@@ -73,6 +73,6 @@ python scripts/vuln_tracker.py \
 
 | Symptom | Likely cause | What to try |
 | --- | --- | --- |
-| ZAP cannot reach Flask | Docker ↔ host networking | Set `DAST_TARGET_URL` in the workflow to `http://172.17.0.1:5000` or your runner’s host alias. |
+| ZAP cannot reach Flask | Wrong URL for how Docker is run | On GitHub Actions this action uses **host networking** — use `http://127.0.0.1:5000`. For a **bridge** `docker run` from your laptop, try `http://host.docker.internal:5000` plus `--add-host=host.docker.internal:host-gateway` on Linux, or `http://172.17.0.1:5000`. |
 | Empty `zap-report.json` | Scan failed before write | Inspect the ZAP step log; confirm Flask health check passed. |
 | Bandit step “fails” but JSON exists | Non-zero exit when issues found | Workflow uses `continue-on-error` so later steps still run. |

@@ -1,6 +1,6 @@
 # SDLC Security Automation Pipeline
 
-A weaving **security testing into CI/CD**—the same rhythm as unit tests, but for common web and Python risks. Everything is **open source**, **file-based** (JSON + Markdown), and **easy to narrate**: static analysis catches dangerous APIs in code; a passive DAST scan catches issues visible over HTTP.
+A **small, interview-friendly** example of weaving **security testing into CI/CD**—the same rhythm as unit tests, but for common web and Python risks. Everything is **open source**, **file-based** (JSON + Markdown), and **easy to narrate**: static analysis catches dangerous APIs in code; a passive DAST scan catches issues visible over HTTP.
 
 ## Why this exists
 
@@ -48,9 +48,19 @@ This repo shows that story **without** Terraform, paid SaaS scanners, or databas
 
 To run the same steps on your machine, see [docs/pipeline_usage_guide.md](docs/pipeline_usage_guide.md).
 
+## Interview walkthrough tips
+
+- **SAST:** Point to `bandit` in the workflow, then open `app/vulnerable_app.py` and map a finding (e.g. `eval`, `subprocess` + `shell=True`, hard-coded password) to **secure alternatives**.
+- **DAST:** Explain that ZAP Baseline is **passive** (no active attacks by default), good for CI, and why the app is bound to `0.0.0.0`. In GitHub Actions, `zaproxy/action-baseline` uses Docker **`--network=host`**, so the target URL is **`http://127.0.0.1:5000`** (same loopback as the runner). Local Docker without host networking may still use `host.docker.internal` or `host-gateway`.
+- **Normalization:** Show `UnifiedFinding` in `scripts/vuln_parser.py`—one shape for two tools makes diffing and reporting predictable.
+- **Governance:** Show `known_issues.json` + the **New / Existing / Resolved** sections in the Markdown report—this is how you track exceptions without a database.
 
 ## Limits (by design)
 
 - Not a full AppSec program: no IAST, no manual pen-test findings, no cloud posture management.
 - ZAP Baseline is **shallow** compared to a full ZAP GUI session—appropriate for fast CI signal.
 - Bandit focuses on **Python patterns**; it does not replace dependency CVE scanners (documented as a next step in the secure coding guide).
+
+## License
+
+Use and modify freely for learning and interviews. The vulnerable application must **not** be deployed publicly.
