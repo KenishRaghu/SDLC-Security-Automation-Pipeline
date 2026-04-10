@@ -9,7 +9,7 @@ Workflow file: `.github/workflows/security-pipeline.yml`
 1. **Install** Python dependencies from `requirements.txt`.
 2. **Start** the sample Flask app on `0.0.0.0:5000` so it is reachable from the ZAP container.
 3. **SAST:** `bandit -r app -f json -o reports/bandit-report.json`
-4. **DAST:** `zaproxy/action-baseline` targets `DAST_TARGET_URL` (default **`http://127.0.0.1:5000`** in this repo’s workflow because the action runs ZAP with Docker **`--network=host`**) and writes `reports/zap-report.json` (`-J` flag). `-I` avoids failing the ZAP script on WARN-level alerts so the job can still publish artifacts.
+4. **DAST:** `zaproxy/action-baseline` targets `DAST_TARGET_URL` (default **`http://127.0.0.1:5000`** because the action uses Docker **`--network=host`**). The action always emits **`report_json.json` at the repository root** and validates that file; a follow-up step copies it to **`reports/zap-report.json`** for `vuln_parser.py`. **`cmd_options` uses only `-I`** so we do not override that `-J` path (a second `-J` breaks the action). `-I` avoids failing the baseline script on WARN-level alerts.
 5. **Normalize:** `python scripts/vuln_parser.py --bandit ... --zap-json ... -o reports/unified_findings.json`
 6. **Track:** `python scripts/vuln_tracker.py --findings ... --baseline known_issues.json -o reports/vuln_report.md`
 7. **Artifacts:** `security-reports` zip on the workflow run contains JSON + Markdown.

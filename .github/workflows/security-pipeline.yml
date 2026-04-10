@@ -69,18 +69,22 @@ jobs:
       - name: Ensure reports directory is writable for ZAP
         run: chmod -R a+rwx reports
 
+      # The action always passes -J report_json.json (repo root) and verifies that file exists.
+      # Do not add a second -J in cmd_options — it overrides the path and breaks the action.
       - name: OWASP ZAP Baseline scan (DAST)
         uses: zaproxy/action-baseline@v0.15.0
         with:
           target: ${{ env.DAST_TARGET_URL }}
-          # -J: JSON report into mounted workspace; -I: do not fail the script on WARN alerts.
-          cmd_options: "-J reports/zap-report.json -I"
+          # -I: do not fail the baseline script on WARN-level alerts.
+          cmd_options: "-I"
           allow_issue_writing: false
           fail_action: false
 
-      - name: Ensure ZAP JSON exists
+      - name: Stage ZAP JSON for parser
         run: |
-          if [ ! -s reports/zap-report.json ]; then
+          if [ -f report_json.json ]; then
+            cp report_json.json reports/zap-report.json
+          else
             echo '{"site":[]}' > reports/zap-report.json
           fi
 
